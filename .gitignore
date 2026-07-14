@@ -1,0 +1,28 @@
+# Build output
+bin/
+obj/
+
+# User secrets (kept outside the project anyway)
+secrets.json
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Node
+node_modules/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
