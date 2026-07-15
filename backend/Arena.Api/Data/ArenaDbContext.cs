@@ -11,4 +11,8 @@ public class ArenaDbContext : DbContext
     }
 
     public DbSet<Player> Players => Set<Player>();
+
+    public DbSet<Match> Matches => Set<Match>();
+
+    public DbSet<Participant> Participants => Set<Participant>();
 }

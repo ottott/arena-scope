@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 using Arena.Api.Models;
+using Arena.Api.Models.Riot;
+
 
 namespace Arena.Api.Services;
 
@@ -54,4 +56,59 @@ public class RiotApiClient
 
         return account!;
     }
+
+    public async Task<List<string>> GetMatchIdsAsync(
+        string puuid,
+        int count)
+    {
+        var apiKey = _configuration["Riot:ApiKey"];
+
+        _httpClient.DefaultRequestHeaders.Clear();
+        _httpClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+
+        var url =
+            $"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}";
+
+        var response = await _httpClient.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+
+            throw new Exception(
+                $"Riot API failed: {(int)response.StatusCode} - {error}");
+        }
+
+        var matches = await response.Content
+            .ReadFromJsonAsync<List<string>>();
+
+        return matches!;
+    }
+
+    public async Task<RiotMatchResponse> GetMatchAsync(string matchId)
+    {
+        var apiKey = _configuration["Riot:ApiKey"];
+
+        _httpClient.DefaultRequestHeaders.Clear();
+        _httpClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+
+        var url =
+            $"https://europe.api.riotgames.com/lol/match/v5/matches/{matchId}";
+
+        var response = await _httpClient.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+
+            throw new Exception(
+                $"Riot API failed: {(int)response.StatusCode} - {error}");
+        }
+
+        var match = await response.Content
+            .ReadFromJsonAsync<RiotMatchResponse>();
+
+        return match!;
+    }
+
 }

@@ -3,6 +3,7 @@ using System;
 using Arena.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Arena.Api.Migrations
 {
     [DbContext(typeof(ArenaDbContext))]
-    partial class ArenaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260715085805_AddMatches")]
+    partial class AddMatches
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,22 +33,8 @@ namespace Arena.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("GameCreation")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("GameDuration")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("GameMode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("GameVersion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("QueueId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("RiotMatchId")
                         .IsRequired()
@@ -54,38 +43,6 @@ namespace Arena.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("Arena.Api.Models.Participant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ChampionName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("MatchId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Placement")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PlayerSubteamId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Puuid")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MatchId");
-
-                    b.ToTable("Participants");
                 });
 
             modelBuilder.Entity("Arena.Api.Models.Player", b =>
@@ -114,17 +71,6 @@ namespace Arena.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Players");
-                });
-
-            modelBuilder.Entity("Arena.Api.Models.Participant", b =>
-                {
-                    b.HasOne("Arena.Api.Models.Match", "Match")
-                        .WithMany()
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Match");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,6 +15,8 @@ builder.Services.AddDbContext<ArenaDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
+
 builder.Services.AddHttpClient<RiotApiClient>();
 
 var app = builder.Build();
