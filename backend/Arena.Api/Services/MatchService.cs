@@ -8,46 +8,54 @@ public class MatchService : IMatchService
 {
     private readonly RiotApiClient _riotApiClient;
     private readonly ArenaDbContext _dbContext;
-
-    public MatchService(RiotApiClient riotApiClient, ArenaDbContext dbContext)
+    private readonly IConfiguration _configuration;
+    public MatchService(RiotApiClient riotApiClient, ArenaDbContext dbContext, IConfiguration configuration)
     {
         _riotApiClient = riotApiClient;
         _dbContext = dbContext;
+        _configuration = configuration;
+        
     }
 
     public async Task<List<string>> GetMatchIdsAsync(
         string puuid,
+        int start,
         int count)
     {
         return await _riotApiClient.GetMatchIdsAsync(
             puuid,
+            start,
             count);
     }
 
-    public async Task ImportMatchAsync(string matchId)
+    public async Task<ImportMatchResult> ImportMatchAsync(string matchId)
     {
         var riotMatch = await _riotApiClient.GetMatchAsync(matchId);
 
+        var currentSeasonStart =
+            _configuration.GetValue<DateTime>("Arena:CurrentSeasonStart");
+
+        var gameCreation =
+            DateTimeOffset
+                .FromUnixTimeMilliseconds(riotMatch.Info.GameCreation)
+                .UtcDateTime;
+
+        if (gameCreation < currentSeasonStart)
+        {
+            return ImportMatchResult.TooOld;
+        }
+
         if (riotMatch.Info.QueueId != 1750)
         {
-            throw new Exception("Only Arena matches can be imported.");
+            return ImportMatchResult.NotArena;
         }
 
-        var exists = await _dbContext.Matches.AnyAsync(m =>
-            m.RiotMatchId == riotMatch.Metadata.MatchId);
-
-        if (exists)
-        {
-            return;
-        }
 
         var match = new Match
         {
             RiotMatchId = riotMatch.Metadata.MatchId,
             GameVersion = riotMatch.Info.GameVersion,
-            GameCreation = DateTimeOffset
-                .FromUnixTimeMilliseconds(riotMatch.Info.GameCreation)
-                .UtcDateTime,
+            GameCreation = gameCreation,
             GameDuration = riotMatch.Info.GameDuration,
             GameMode = riotMatch.Info.GameMode,
             QueueId = riotMatch.Info.QueueId
@@ -72,5 +80,53 @@ public class MatchService : IMatchService
         }
 
         await _dbContext.SaveChangesAsync();
+                
+        return ImportMatchResult.Imported;
     }
+
+    public async Task SyncPlayerMatchesAsync(string puuid)
+    {
+        var start = 0;
+        const int count = 100;
+
+        while (true)
+        {
+            var matchIds = await GetMatchIdsAsync(
+                puuid,
+                start,
+                count);
+
+            if (matchIds.Count == 0)
+            {
+                break;
+            }
+
+            foreach (var matchId in matchIds)
+            {
+                var exists = await _dbContext.Matches.AnyAsync(
+                    m => m.RiotMatchId == matchId);
+
+                if (exists)
+                {
+                    continue;
+                }
+
+                var result = await ImportMatchAsync(matchId);
+
+                if (result == ImportMatchResult.TooOld)
+                {
+                    return;
+                }
+
+            }
+
+            if (matchIds.Count < count)
+            {
+                break;
+            }
+
+            start += count;
+        }
+    }
+
 }

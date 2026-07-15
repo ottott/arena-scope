@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using Arena.Api.Models;
 using Arena.Api.Models.Riot;
@@ -17,6 +18,24 @@ public class RiotApiClient
         _httpClient = httpClient;
         _configuration = configuration;
     }
+
+    private async Task<HttpResponseMessage> GetWithRetryAsync(string url)
+    {
+        while (true)
+        {
+            var response = await _httpClient.GetAsync(url);
+
+            if (response.StatusCode != HttpStatusCode.TooManyRequests)
+            {
+                return response;
+            }
+
+            var retryAfter = response.Headers.RetryAfter?.Delta
+                            ?? TimeSpan.FromSeconds(5);
+
+            await Task.Delay(retryAfter);
+        }
+}
 
     public async Task<RiotAccountResponse> GetAccountAsync(
         string gameName,
@@ -49,6 +68,7 @@ public class RiotApiClient
         {
             throw new Exception("Riot API rate limit exceeded.");
         }
+        
 
         response.EnsureSuccessStatusCode();
 
@@ -59,6 +79,7 @@ public class RiotApiClient
 
     public async Task<List<string>> GetMatchIdsAsync(
         string puuid,
+        int start,
         int count)
     {
         var apiKey = _configuration["Riot:ApiKey"];
@@ -67,7 +88,7 @@ public class RiotApiClient
         _httpClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
 
         var url =
-            $"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}";
+            $"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start={start}&count={count}";
 
         var response = await _httpClient.GetAsync(url);
 
@@ -95,7 +116,7 @@ public class RiotApiClient
         var url =
             $"https://europe.api.riotgames.com/lol/match/v5/matches/{matchId}";
 
-        var response = await _httpClient.GetAsync(url);
+        var response = await GetWithRetryAsync(url);
 
         if (!response.IsSuccessStatusCode)
         {
