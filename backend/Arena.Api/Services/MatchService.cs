@@ -20,12 +20,14 @@ public class MatchService : IMatchService
     public async Task<List<string>> GetMatchIdsAsync(
         string puuid,
         int start,
-        int count)
+        int count,
+        long? startTime)
     {
         return await _riotApiClient.GetMatchIdsAsync(
             puuid,
             start,
-            count);
+            count,
+            startTime);
     }
 
     public async Task<ImportMatchResult> ImportMatchAsync(string matchId)
@@ -84,17 +86,39 @@ public class MatchService : IMatchService
         return ImportMatchResult.Imported;
     }
 
-    public async Task SyncPlayerMatchesAsync(string puuid)
+    public async Task SyncPlayerMatchesAsync(Player player)
     {
         var start = 0;
         const int count = 100;
 
+        var syncStartedAt = DateTime.UtcNow;
+
+        var currentSeasonStart =
+            _configuration.GetValue<DateTime>("Arena:CurrentSeasonStart");
+
+        DateTime? startDate = null;
+
+        if (player.LastSyncedAt.HasValue)
+        {
+            startDate = player.LastSyncedAt.Value.AddMinutes(-40);
+
+            if (startDate < currentSeasonStart)
+            {
+                startDate = currentSeasonStart;
+            }
+        }
+
+        long? startTime = startDate == null
+            ? null
+            : new DateTimeOffset(startDate.Value).ToUnixTimeSeconds();
+
         while (true)
         {
             var matchIds = await GetMatchIdsAsync(
-                puuid,
+                player.Puuid,
                 start,
-                count);
+                count,
+                startTime);
 
             if (matchIds.Count == 0)
             {
@@ -115,6 +139,10 @@ public class MatchService : IMatchService
 
                 if (result == ImportMatchResult.TooOld)
                 {
+                    player.LastSyncedAt = syncStartedAt;
+
+                    await _dbContext.SaveChangesAsync();
+                    
                     return;
                 }
 
@@ -127,6 +155,11 @@ public class MatchService : IMatchService
 
             start += count;
         }
+        
+        player.LastSyncedAt = syncStartedAt;
+
+        await _dbContext.SaveChangesAsync();
+
     }
 
 }

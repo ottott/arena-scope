@@ -48,12 +48,34 @@ public class PlayerController : ControllerBase
                 gameName,
                 tagLine);
 
-            await _matchService.SyncPlayerMatchesAsync(player.Puuid);
+            await _matchService.SyncPlayerMatchesAsync(player);
 
             return Ok(new
             {
                 message = "Player synchronized successfully."
             });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
+    }
+
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetPlayerStats(
+        [FromQuery] string gameName,
+        [FromQuery] string tagLine)
+    {
+        try
+        {
+            var stats = await _playerService.GetPlayerStatsAsync(
+                gameName,
+                tagLine);
+
+            return Ok(stats);
         }
         catch (Exception ex)
         {

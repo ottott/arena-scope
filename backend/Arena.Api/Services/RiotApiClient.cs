@@ -80,7 +80,8 @@ public class RiotApiClient
     public async Task<List<string>> GetMatchIdsAsync(
         string puuid,
         int start,
-        int count)
+        int count,
+        long? startTime)
     {
         var apiKey = _configuration["Riot:ApiKey"];
 
@@ -89,6 +90,12 @@ public class RiotApiClient
 
         var url =
             $"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start={start}&count={count}";
+
+        
+        if (startTime.HasValue)
+        {
+            url += $"&startTime={startTime}";
+        }
 
         var response = await _httpClient.GetAsync(url);
 

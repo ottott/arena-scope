@@ -1,6 +1,7 @@
 using Arena.Api.Models;
 using Arena.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using Arena.Api.Dtos;
 
 namespace Arena.Api.Services;
 
@@ -21,20 +22,14 @@ public class PlayerService : IPlayerService
         string gameName,
         string tagLine)
     {
+    var account = await _riotApiClient.GetAccountAsync(gameName, tagLine);
 
-        var existingPlayer = await _context.Players
-            .FirstOrDefaultAsync(p =>
-                p.GameName == gameName &&
-                p.TagLine == tagLine);
+    var player = await _context.Players
+        .FirstOrDefaultAsync(p => p.Puuid == account.Puuid);
 
-        if (existingPlayer is not null)
-        {
-            return existingPlayer;
-        }
-
-        var account = await _riotApiClient.GetAccountAsync(gameName, tagLine);
-
-        var player = new Player
+    if (player == null)
+    {
+        player = new Player
         {
             GameName = account.GameName,
             TagLine = account.TagLine,
@@ -42,9 +37,35 @@ public class PlayerService : IPlayerService
         };
 
         _context.Players.Add(player);
+    }
+    else
+    {
+        player.GameName = gameName;
+        player.TagLine = tagLine;
+    }
 
-        await _context.SaveChangesAsync();
+    await _context.SaveChangesAsync();
 
-        return player;
+    return player;
+    }
+
+    public async Task<PlayerStatsDto> GetPlayerStatsAsync(string gameName, string tagLine)
+    {
+        var player = await GetPlayerAsync(gameName, tagLine);
+        
+        var games = await _context.Participants.CountAsync(p => p.Puuid == player.Puuid);
+
+        var wins = await _context.Participants.CountAsync(p => p.Puuid == player.Puuid && p.Placement == 1);
+
+        var averagePlacement = await _context.Participants.Where(p => p.Puuid == player.Puuid).AverageAsync(p => p.Placement);
+        
+        return new PlayerStatsDto
+        {
+            GameName = player.GameName,
+            TagLine = player.TagLine,
+            Games = games,
+            Wins = wins,
+            AveragePlacement = averagePlacement
+        };
     }
 }

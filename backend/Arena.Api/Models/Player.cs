@@ -11,4 +11,6 @@ public class Player
     public required string Puuid { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public DateTime? LastSyncedAt { get; set; }
 }
