@@ -52,7 +52,7 @@ public class RiotApiClient
         var url =
             $"https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}";
 
-        var response = await _httpClient.GetAsync(url);
+        var response = await GetWithRetryAsync(url);
 
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
@@ -97,7 +97,7 @@ public class RiotApiClient
             url += $"&startTime={startTime}";
         }
 
-        var response = await _httpClient.GetAsync(url);
+        var response = await GetWithRetryAsync(url);
 
         if (!response.IsSuccessStatusCode)
         {

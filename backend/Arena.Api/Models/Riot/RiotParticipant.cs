@@ -9,4 +9,8 @@ public class RiotParticipant
     public int Placement { get; set; }
 
     public int PlayerSubteamId { get; set; }
+
+    public string RiotIdGameName { get; set; } = "";
+
+    public string RiotIdTagline { get; set; } = "";
 }

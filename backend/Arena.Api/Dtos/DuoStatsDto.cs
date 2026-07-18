@@ -1,6 +1,6 @@
 namespace Arena.Api.Dtos;
 
-public class PlayerStatsDto
+public class DuoStatsDto
 {
     public required string GameName { get; set; }
 
@@ -10,13 +10,11 @@ public class PlayerStatsDto
 
     public int Wins { get; set; }
 
-    public double AveragePlacement { get; set; }
+    public double WinRate { get; set; }
 
     public int SuccessfulPlacements { get; set; }
 
     public double SuccessfulPlacementRate { get; set; }
 
-    public List<ChampionStatsDto> ChampionStats { get; set; } = [];
-
-    public List<DuoStatsDto> DuoStats { get; set; } = [];
+    public double AveragePlacement { get; set; }
 }

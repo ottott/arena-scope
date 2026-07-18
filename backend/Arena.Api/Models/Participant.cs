@@ -10,6 +10,10 @@ public class Participant
 
     public required string Puuid { get; set; }
 
+    public required string GameName { get; set; }
+
+    public required string TagLine { get; set; }
+
     public required string ChampionName { get; set; }
 
     public int Placement { get; set; }

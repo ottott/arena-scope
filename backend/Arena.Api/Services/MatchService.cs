@@ -72,7 +72,11 @@ public class MatchService : IMatchService
             var participant = new Participant
             {
                 MatchId = match.Id,
+                
                 Puuid = riotParticipant.Puuid,
+                GameName = riotParticipant.RiotIdGameName,
+                TagLine = riotParticipant.RiotIdTagline,
+
                 ChampionName = riotParticipant.ChampionName,
                 Placement = riotParticipant.Placement,
                 PlayerSubteamId = riotParticipant.PlayerSubteamId
@@ -142,7 +146,7 @@ public class MatchService : IMatchService
                     player.LastSyncedAt = syncStartedAt;
 
                     await _dbContext.SaveChangesAsync();
-                    
+
                     return;
                 }
 
