@@ -78,6 +78,10 @@ public class PlayerService : IPlayerService
         
         var duoStats = await _statsService.GetDuoStatsAsync(player.Puuid);
 
+        var itemStats = await _statsService.GetItemStatsAsync(player.Puuid);
+
+        var augmentStats = await _statsService.GetAugmentStatsAsync(player.Puuid);
+
 
 
         return new PlayerStatsDto
@@ -90,7 +94,9 @@ public class PlayerService : IPlayerService
             SuccessfulPlacementRate = overallStats.SuccessfulPlacementRate,
             AveragePlacement = overallStats.AveragePlacement,
             DuoStats = duoStats,
-            ChampionStats = championStats
+            ChampionStats = championStats,
+            ItemStats = itemStats,
+            AugmentStats = augmentStats
         };
     }
 }

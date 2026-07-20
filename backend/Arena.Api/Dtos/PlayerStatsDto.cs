@@ -19,4 +19,8 @@ public class PlayerStatsDto
     public List<ChampionStatsDto> ChampionStats { get; set; } = [];
 
     public List<DuoStatsDto> DuoStats { get; set; } = [];
+
+    public List<ItemStatsDto> ItemStats { get; set; } = [];
+
+    public List<AugmentStatsDto> AugmentStats { get; set; } = [];
 }
