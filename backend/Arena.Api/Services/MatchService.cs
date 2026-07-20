@@ -79,7 +79,21 @@ public class MatchService : IMatchService
 
                 ChampionName = riotParticipant.ChampionName,
                 Placement = riotParticipant.Placement,
-                PlayerSubteamId = riotParticipant.PlayerSubteamId
+                PlayerSubteamId = riotParticipant.PlayerSubteamId,
+
+                Item0Id = riotParticipant.Item0,
+                Item1Id = riotParticipant.Item1,
+                Item2Id = riotParticipant.Item2,
+                Item3Id = riotParticipant.Item3,
+                Item4Id = riotParticipant.Item4,
+                Item5Id = riotParticipant.Item5,
+
+                Augment1Id = riotParticipant.PlayerAugment1,
+                Augment2Id = riotParticipant.PlayerAugment2,
+                Augment3Id = riotParticipant.PlayerAugment3,
+                Augment4Id = riotParticipant.PlayerAugment4,
+                Augment5Id = riotParticipant.PlayerAugment5,
+                Augment6Id = riotParticipant.PlayerAugment6
             };
 
             _dbContext.Participants.Add(participant);

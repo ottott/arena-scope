@@ -11,16 +11,20 @@ public class PlayerService : IPlayerService
 
     private readonly ArenaDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly StatsService _statsService;
 
     public PlayerService(
         RiotApiClient riotApiClient,
         ArenaDbContext context,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        StatsService statsService)
     {
         _riotApiClient = riotApiClient;
         _context = context;
         _configuration = configuration;
+        _statsService = statsService;
     }
+
     public async Task<Player> GetPlayerAsync(
         string gameName,
         string tagLine)
@@ -64,103 +68,27 @@ public class PlayerService : IPlayerService
 
         var successfulPlacement = _configuration.GetValue<int>("Arena:SuccessfulPlacement");
 
-        var successfulPlacements = await _context.Participants.CountAsync(
-            p => p.Puuid == player.Puuid &&
-                p.Placement <= successfulPlacement);
+        var successfulPlacements = await _context.Participants.CountAsync(p => p.Puuid == player.Puuid &&
+                                                                        p.Placement <= successfulPlacement);
         
         
-
-        var championStats = await _context.Participants
-            .Where(p => p.Puuid == player.Puuid)
-            .GroupBy(p => p.ChampionName)
-            .Select(g => new ChampionStatsDto
-            {
-                ChampionName = g.Key,
-                Games = g.Count(),
-                Wins = g.Count(p => p.Placement == 1),
-                AveragePlacement = g.Average(p => p.Placement),
-                WinRate = (double)g.Count(p => p.Placement == 1) / g.Count() * 100,
-
-                SuccessfulPlacements = g.Count(
-                    p => p.Placement <= successfulPlacement),
-
-                SuccessfulPlacementRate =
-                    (double)g.Count(
-                        p => p.Placement <= successfulPlacement)
-                    / g.Count() * 100,
-            })
-            .OrderByDescending(c => c.Games)
-            .ToListAsync();
+        var overallStats = await _statsService.GetOverallStatsAsync(player.Puuid);
         
+        var championStats = await _statsService.GetChampionStatsAsync(player.Puuid);
+        
+        var duoStats = await _statsService.GetDuoStatsAsync(player.Puuid);
 
-        var duoStats = await (
-            from me in _context.Participants
-
-            join teammate in _context.Participants
-                on new
-                {
-                    me.MatchId,
-                    me.PlayerSubteamId
-                }
-                equals new
-                {
-                    teammate.MatchId,
-                    teammate.PlayerSubteamId
-                }
-
-            where me.Puuid == player.Puuid
-                && teammate.Puuid != player.Puuid
-
-            group me by new
-            {
-                teammate.Puuid,
-                teammate.GameName,
-                teammate.TagLine
-            }
-            into g
-
-            select new DuoStatsDto
-            {
-                GameName = g.Key.GameName,
-                TagLine = g.Key.TagLine,
-
-                Games = g.Count(),
-
-                Wins = g.Count(p => p.Placement == 1),
-
-                SuccessfulPlacements = g.Count(
-                    p => p.Placement <= successfulPlacement),
-
-                AveragePlacement = g.Average(p => p.Placement),
-
-                WinRate =
-                    (double)g.Count(p => p.Placement == 1)
-                    / g.Count() * 100,
-
-                SuccessfulPlacementRate =
-                    (double)g.Count(
-                        p => p.Placement <= successfulPlacement)
-                    / g.Count() * 100
-            })
-            .OrderByDescending(d => d.Games)
-            .ToListAsync();
 
 
         return new PlayerStatsDto
         {
             GameName = player.GameName,
             TagLine = player.TagLine,
-            Games = games,
-            Wins = wins,
-
-            SuccessfulPlacements = successfulPlacements,
-
-            SuccessfulPlacementRate =
-                games == 0
-                    ? 0
-                    : (double)successfulPlacements / games * 100,
-
-            AveragePlacement = averagePlacement,
+            Games = overallStats.Games,
+            Wins = overallStats.Wins,
+            SuccessfulPlacements = overallStats.SuccessfulPlacements,
+            SuccessfulPlacementRate = overallStats.SuccessfulPlacementRate,
+            AveragePlacement = overallStats.AveragePlacement,
             DuoStats = duoStats,
             ChampionStats = championStats
         };

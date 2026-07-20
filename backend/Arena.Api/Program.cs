@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ArenaDbContext>(options =>
 
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<StatsService>();
 
 builder.Services.AddHttpClient<RiotApiClient>();
 

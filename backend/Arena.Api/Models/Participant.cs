@@ -19,4 +19,18 @@ public class Participant
     public int Placement { get; set; }
 
     public int PlayerSubteamId { get; set; }
+
+    public int Item0Id { get; set; }
+    public int Item1Id { get; set; }
+    public int Item2Id { get; set; }
+    public int Item3Id { get; set; }
+    public int Item4Id { get; set; }
+    public int Item5Id { get; set; }
+
+    public int Augment1Id { get; set; }
+    public int Augment2Id { get; set; }
+    public int Augment3Id { get; set; }
+    public int Augment4Id { get; set; }
+    public int Augment5Id { get; set; }
+    public int Augment6Id { get; set; }
 }
