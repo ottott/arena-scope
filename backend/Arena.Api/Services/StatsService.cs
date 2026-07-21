@@ -9,13 +9,16 @@ public class StatsService
 {
     private readonly ArenaDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly ItemLookupService _itemLookup;
 
     public StatsService(
         ArenaDbContext context,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ItemLookupService itemLookup)
     {
         _context = context;
         _configuration = configuration;
+        _itemLookup = itemLookup;
     }
 
     private record ItemParticipant(
@@ -227,6 +230,7 @@ public class StatsService
             return new ItemStatsDto
             {
                 ItemId = g.Key,
+                ItemName = _itemLookup.GetName(g.Key),
 
                 Games = stats.Games,
                 Wins = stats.Wins,

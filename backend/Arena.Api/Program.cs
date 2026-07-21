@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ArenaDbContext>(options =>
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<StatsService>();
+builder.Services.AddSingleton<ItemLookupService>();
+builder.Services.AddHttpClient();
 
 builder.Services.AddHttpClient<RiotApiClient>();
 
@@ -34,5 +36,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var itemLookup =
+        scope.ServiceProvider.GetRequiredService<ItemLookupService>();
+
+    await itemLookup.LoadAsync();
+}
 
 app.Run();
