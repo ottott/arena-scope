@@ -282,5 +282,18 @@ public StatsService(
             .OrderByDescending(a => a.Games)
             .ToList();
     }
+
+    public async Task<List<PlacementDistributionDto>> GetPlacementDistributionAsync(string puuid)
+    {
+        return await GetPlayerParticipants(puuid)
+            .GroupBy(p => p.Placement)
+            .Select(g => new PlacementDistributionDto
+            {
+                Placement = g.Key,
+                Games = g.Count()
+            })
+            .OrderBy(x => x.Placement)
+            .ToListAsync();
+    }
     
 }

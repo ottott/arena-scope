@@ -21,3 +21,20 @@ export async function getPlayerStats(
 
     return response.data;
 }
+
+export async function syncPlayer(
+    gameName: string,
+    tagLine: string
+): Promise<void> {
+
+    await arenaApi.post(
+        "/player/sync",
+        null,
+        {
+            params: {
+                gameName,
+                tagLine
+            }
+        }
+    );
+}

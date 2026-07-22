@@ -67,6 +67,8 @@ public class PlayerService : IPlayerService
 
         var augmentStats = await _statsService.GetAugmentStatsAsync(player.Puuid);
 
+        var placementDistribution = await _statsService.GetPlacementDistributionAsync(player.Puuid);
+
 
 
         return new PlayerStatsDto
@@ -82,7 +84,8 @@ public class PlayerService : IPlayerService
             DuoStats = duoStats,
             ChampionStats = championStats,
             ItemStats = itemStats,
-            AugmentStats = augmentStats
+            AugmentStats = augmentStats,
+            PlacementDistribution = placementDistribution
         };
     }
 }
