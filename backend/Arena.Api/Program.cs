@@ -18,6 +18,7 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<StatsService>();
 builder.Services.AddSingleton<ItemLookupService>();
+builder.Services.AddSingleton<AugmentLookupService>();
 builder.Services.AddHttpClient();
 
 builder.Services.AddHttpClient<RiotApiClient>();
@@ -43,6 +44,11 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider.GetRequiredService<ItemLookupService>();
 
     await itemLookup.LoadAsync();
+
+    var augmentLookup =
+        scope.ServiceProvider.GetRequiredService<AugmentLookupService>();
+
+    await augmentLookup.LoadAsync();
 }
 
 app.Run();

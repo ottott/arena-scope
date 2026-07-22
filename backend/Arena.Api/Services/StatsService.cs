@@ -10,16 +10,19 @@ public class StatsService
     private readonly ArenaDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly ItemLookupService _itemLookup;
+    private readonly AugmentLookupService _augmentLookup;
 
-    public StatsService(
-        ArenaDbContext context,
-        IConfiguration configuration,
-        ItemLookupService itemLookup)
-    {
-        _context = context;
-        _configuration = configuration;
-        _itemLookup = itemLookup;
-    }
+public StatsService(
+    ArenaDbContext context,
+    IConfiguration configuration,
+    ItemLookupService itemLookup,
+    AugmentLookupService augmentLookup)
+{
+    _context = context;
+    _configuration = configuration;
+    _itemLookup = itemLookup;
+    _augmentLookup = augmentLookup;
+}
 
     private record ItemParticipant(
         Participant Participant,
@@ -266,6 +269,7 @@ public class StatsService
                 return new AugmentStatsDto
                 {
                     AugmentId = g.Key,
+                    AugmentName = _augmentLookup.GetName(g.Key),
 
                     Games = stats.Games,
                     Wins = stats.Wins,
