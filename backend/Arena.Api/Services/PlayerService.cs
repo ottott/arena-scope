@@ -10,18 +10,15 @@ public class PlayerService : IPlayerService
     private readonly RiotApiClient _riotApiClient;
 
     private readonly ArenaDbContext _context;
-    private readonly IConfiguration _configuration;
     private readonly StatsService _statsService;
 
     public PlayerService(
         RiotApiClient riotApiClient,
         ArenaDbContext context,
-        IConfiguration configuration,
         StatsService statsService)
     {
         _riotApiClient = riotApiClient;
         _context = context;
-        _configuration = configuration;
         _statsService = statsService;
     }
 
@@ -59,19 +56,7 @@ public class PlayerService : IPlayerService
     public async Task<PlayerStatsDto> GetPlayerStatsAsync(string gameName, string tagLine)
     {
         var player = await GetPlayerAsync(gameName, tagLine);
-        
-        var games = await _context.Participants.CountAsync(p => p.Puuid == player.Puuid);
-
-        var wins = await _context.Participants.CountAsync(p => p.Puuid == player.Puuid && p.Placement == 1);
-
-        var averagePlacement = await _context.Participants.Where(p => p.Puuid == player.Puuid).AverageAsync(p => p.Placement);
-
-        var successfulPlacement = _configuration.GetValue<int>("Arena:SuccessfulPlacement");
-
-        var successfulPlacements = await _context.Participants.CountAsync(p => p.Puuid == player.Puuid &&
-                                                                        p.Placement <= successfulPlacement);
-        
-        
+               
         var overallStats = await _statsService.GetOverallStatsAsync(player.Puuid);
         
         var championStats = await _statsService.GetChampionStatsAsync(player.Puuid);
@@ -92,6 +77,7 @@ public class PlayerService : IPlayerService
             Wins = overallStats.Wins,
             SuccessfulPlacements = overallStats.SuccessfulPlacements,
             SuccessfulPlacementRate = overallStats.SuccessfulPlacementRate,
+            WinRate = overallStats.WinRate,
             AveragePlacement = overallStats.AveragePlacement,
             DuoStats = duoStats,
             ChampionStats = championStats,
