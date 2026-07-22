@@ -20,6 +20,20 @@ public class Participant
 
     public int PlayerSubteamId { get; set; }
 
+    public int Kills { get; set; }
+
+    public int Deaths { get; set; }
+
+    public int Assists { get; set; }
+
+    public int DamageDealt { get; set; }
+
+    public int DamageTaken { get; set; }
+
+    public int Healing { get; set; }
+
+    public int Shielding { get; set; }
+    
     public int Item0Id { get; set; }
     public int Item1Id { get; set; }
     public int Item2Id { get; set; }
@@ -34,5 +48,5 @@ public class Participant
     public int Augment5Id { get; set; }
     public int Augment6Id { get; set; }
 
-    
+
 }

@@ -12,17 +12,17 @@ public class StatsService
     private readonly ItemLookupService _itemLookup;
     private readonly AugmentLookupService _augmentLookup;
 
-public StatsService(
-    ArenaDbContext context,
-    IConfiguration configuration,
-    ItemLookupService itemLookup,
-    AugmentLookupService augmentLookup)
-{
-    _context = context;
-    _configuration = configuration;
-    _itemLookup = itemLookup;
-    _augmentLookup = augmentLookup;
-}
+    public StatsService(
+        ArenaDbContext context,
+        IConfiguration configuration,
+        ItemLookupService itemLookup,
+        AugmentLookupService augmentLookup)
+    {
+        _context = context;
+        _configuration = configuration;
+        _itemLookup = itemLookup;
+        _augmentLookup = augmentLookup;
+    }
 
     private record ItemParticipant(
         Participant Participant,
@@ -154,7 +154,8 @@ public StatsService(
                     AveragePlacement = stats.AveragePlacement
                 };
             })
-            .OrderByDescending(c => c.Games)
+            .Where(x => x.Games >= 5)
+            .OrderBy(x => x.AveragePlacement)
             .ToList();
     }
 
@@ -208,7 +209,8 @@ public StatsService(
                     AveragePlacement = stats.AveragePlacement
                 };
             })
-            .OrderByDescending(d => d.Games)
+            .Where(x => x.Games >= 5)
+            .OrderBy(x => x.AveragePlacement)
             .ToList();
     }
 
@@ -223,28 +225,28 @@ public StatsService(
         var groups = FlattenItems(participants)
             .GroupBy(x => x.ItemId);
 
-    return groups
-        .Select(g =>
-        {
-            var stats = BuildEntityStats(
-                g.Select(x => x.Participant),
-                successfulPlacement);
-
-            return new ItemStatsDto
+        return groups
+            .Select(g =>
             {
-                ItemId = g.Key,
-                ItemName = _itemLookup.GetName(g.Key),
+                var stats = BuildEntityStats(
+                    g.Select(x => x.Participant),
+                    successfulPlacement);
 
-                Games = stats.Games,
-                Wins = stats.Wins,
-                WinRate = stats.WinRate,
-                SuccessfulPlacements = stats.SuccessfulPlacements,
-                SuccessfulPlacementRate = stats.SuccessfulPlacementRate,
-                AveragePlacement = stats.AveragePlacement
-            };
-        })
-        .OrderByDescending(i => i.Games)
-        .ToList();
+                return new ItemStatsDto
+                {
+                    ItemId = g.Key,
+                    ItemName = _itemLookup.GetName(g.Key),
+
+                    Games = stats.Games,
+                    Wins = stats.Wins,
+                    WinRate = stats.WinRate,
+                    SuccessfulPlacements = stats.SuccessfulPlacements,
+                    SuccessfulPlacementRate = stats.SuccessfulPlacementRate,
+                    AveragePlacement = stats.AveragePlacement
+                };
+            })
+            .OrderByDescending(i => i.Games)
+            .ToList();
 
     }
 
@@ -295,5 +297,103 @@ public StatsService(
             .OrderBy(x => x.Placement)
             .ToListAsync();
     }
-    
+
+
+    public async Task<PerformanceStatsDto> GetPerformanceStatsAsync(string puuid)
+    {
+        var participants = await _context.Participants
+            .Where(p => p.Puuid == puuid)
+            .ToListAsync();
+
+        if (participants.Count == 0)
+        {
+            return new PerformanceStatsDto();
+        }
+
+        var averageDeaths = participants.Average(p => p.Deaths);
+
+        return new PerformanceStatsDto
+        {
+            AverageKills = participants.Average(p => p.Kills),
+
+            AverageDeaths = averageDeaths,
+
+            AverageAssists = participants.Average(p => p.Assists),
+
+            AverageKda = averageDeaths == 0
+                ? participants.Average(p => p.Kills + p.Assists)
+                : participants.Average(p => (double)(p.Kills + p.Assists) / p.Deaths),
+
+            AverageDamageDealt = participants.Average(p => p.DamageDealt),
+
+            AverageDamageTaken = participants.Average(p => p.DamageTaken),
+
+            AverageHealing = participants.Average(p => p.Healing),
+
+            AverageShielding = participants.Average(p => p.Shielding)
+        };
+    }
+
+    public async Task<List<TeamChampionStatsDto>> GetTeamChampionStatsAsync(string puuid)
+    {
+        var successfulPlacement =
+            _configuration.GetValue<int>("Arena:SuccessfulPlacement");
+
+        var stats = await _context.Participants
+
+            // Find YOUR participant rows
+            .Where(p => p.Puuid == puuid)
+
+            // For each of your games...
+            .SelectMany(player =>
+                _context.Participants
+
+                    // ...find your teammates
+                    .Where(teammate =>
+                        teammate.MatchId == player.MatchId &&
+                        teammate.PlayerSubteamId == player.PlayerSubteamId &&
+                        teammate.Puuid != player.Puuid)
+
+                    // Project teammate champion + YOUR result
+                    .Select(teammate => new
+                    {
+                        teammate.ChampionName,
+
+                        player.Placement
+                    }))
+
+            // Group by teammate champion
+            .GroupBy(x => x.ChampionName)
+
+            .Select(g => new TeamChampionStatsDto
+            {
+                ChampionName = g.Key,
+
+                Games = g.Count(),
+
+                Wins = g.Count(x => x.Placement == 1),
+
+                WinRate =
+                    (double)g.Count(x => x.Placement == 1)
+                    / g.Count() * 100,
+
+                SuccessfulPlacements =
+                    g.Count(x => x.Placement <= successfulPlacement),
+
+                SuccessfulPlacementRate =
+                    (double)g.Count(x => x.Placement <= successfulPlacement)
+                    / g.Count() * 100,
+
+                AveragePlacement =
+                    g.Average(x => x.Placement)
+            })
+
+            .Where(x => x.Games >= 5)
+            .OrderBy(x => x.AveragePlacement)
+
+            .ToListAsync();
+
+        return stats;
+    }
+
 }

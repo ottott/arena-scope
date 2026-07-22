@@ -14,6 +14,15 @@ public class RiotParticipant
 
     public string RiotIdTagline { get; set; } = "";
 
+    public int Kills { get; set; }
+    public int Deaths { get; set; }
+    public int Assists { get; set; }
+
+    public int TotalDamageDealtToChampions { get; set; }
+    public int TotalDamageTaken { get; set; }
+    public int TotalHeal { get; set; }
+    public int TotalDamageShieldedOnTeammates { get; set; }
+
     public int Item0 { get; set; }
     public int Item1 { get; set; }
     public int Item2 { get; set; }

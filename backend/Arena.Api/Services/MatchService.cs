@@ -14,7 +14,7 @@ public class MatchService : IMatchService
         _riotApiClient = riotApiClient;
         _dbContext = dbContext;
         _configuration = configuration;
-        
+
     }
 
     public async Task<List<string>> GetMatchIdsAsync(
@@ -72,7 +72,7 @@ public class MatchService : IMatchService
             var participant = new Participant
             {
                 MatchId = match.Id,
-                
+
                 Puuid = riotParticipant.Puuid,
                 GameName = riotParticipant.RiotIdGameName,
                 TagLine = riotParticipant.RiotIdTagline,
@@ -80,6 +80,15 @@ public class MatchService : IMatchService
                 ChampionName = riotParticipant.ChampionName,
                 Placement = riotParticipant.Placement,
                 PlayerSubteamId = riotParticipant.PlayerSubteamId,
+
+                Kills = riotParticipant.Kills,
+                Deaths = riotParticipant.Deaths,
+                Assists = riotParticipant.Assists,
+
+                DamageDealt = riotParticipant.TotalDamageDealtToChampions,
+                DamageTaken = riotParticipant.TotalDamageTaken,
+                Healing = riotParticipant.TotalHeal,
+                Shielding = riotParticipant.TotalDamageShieldedOnTeammates,
 
                 Item0Id = riotParticipant.Item0,
                 Item1Id = riotParticipant.Item1,
@@ -100,7 +109,7 @@ public class MatchService : IMatchService
         }
 
         await _dbContext.SaveChangesAsync();
-                
+
         return ImportMatchResult.Imported;
     }
 
@@ -173,7 +182,7 @@ public class MatchService : IMatchService
 
             start += count;
         }
-        
+
         player.LastSyncedAt = syncStartedAt;
 
         await _dbContext.SaveChangesAsync();

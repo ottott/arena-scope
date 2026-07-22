@@ -21,6 +21,7 @@ public class PlayerService : IPlayerService
         _context = context;
         _statsService = statsService;
     }
+    
 
     public async Task<Player> GetPlayerAsync(
         string gameName,
@@ -69,6 +70,10 @@ public class PlayerService : IPlayerService
 
         var placementDistribution = await _statsService.GetPlacementDistributionAsync(player.Puuid);
 
+        var performanceStats = await _statsService.GetPerformanceStatsAsync(player.Puuid);
+
+        var teamChampionStats = await _statsService.GetTeamChampionStatsAsync(player.Puuid);
+
 
 
         return new PlayerStatsDto
@@ -85,7 +90,9 @@ public class PlayerService : IPlayerService
             ChampionStats = championStats,
             ItemStats = itemStats,
             AugmentStats = augmentStats,
-            PlacementDistribution = placementDistribution
+            PlacementDistribution = placementDistribution,
+            PerformanceStats = performanceStats,
+            TeamChampionStats = teamChampionStats,
         };
     }
 }

@@ -15,4 +15,8 @@ public class PlayerStatsDto : EntityStatsDto
     public List<AugmentStatsDto> AugmentStats { get; set; } = [];
 
     public List<PlacementDistributionDto> PlacementDistribution { get; set; } = [];
+
+    public PerformanceStatsDto PerformanceStats { get; set; } = new();
+
+    public List<TeamChampionStatsDto> TeamChampionStats { get; set; } = [];
 }

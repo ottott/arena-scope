@@ -29,6 +29,14 @@
 
             </v-row>
 
+
+            <v-divider v-if="stats" class="my-8" />
+
+            <v-text-field v-if="stats" label="Filter dataset by champion, item or augment..." prepend-inner-icon="mdi-magnify"
+                variant="outlined" clearable />
+
+
+            
             <v-row v-if="stats" class="mt-6">
 
                 <v-col cols="12" sm="6" md="3">
@@ -48,11 +56,6 @@
                 </v-col>
 
             </v-row>
-
-            <v-divider v-if="stats" class="my-8" />
-
-            <v-text-field v-if="stats" label="Filter by champion, item or augment..." prepend-inner-icon="mdi-magnify"
-                variant="outlined" clearable />
 
             <v-tabs v-if="stats" v-model="currentTab" class="mt-4">
                 <v-tab value="overall">
@@ -75,7 +78,11 @@
             <v-window v-if="stats" v-model="currentTab" class="mt-6">
 
                 <v-window-item value="overall">
-                    <OverallTab :placement-distribution="stats!.placementDistribution" :duo-stats="stats!.duoStats" />
+                    <OverallTab :placement-distribution="stats!.placementDistribution" 
+                    :performance-stats="stats!.performanceStats"
+                    :duo-stats="stats!.duoStats" 
+                    :team-champion-stats= "stats!.teamChampionStats"
+                    :champion-stats="stats!.championStats"/>
                 </v-window-item>
 
                 <v-window-item value="items">

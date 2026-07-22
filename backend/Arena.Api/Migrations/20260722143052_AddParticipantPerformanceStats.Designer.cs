@@ -3,6 +3,7 @@ using System;
 using Arena.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Arena.Api.Migrations
 {
     [DbContext(typeof(ArenaDbContext))]
-    partial class ArenaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722143052_AddParticipantPerformanceStats")]
+    partial class AddParticipantPerformanceStats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,9 +67,6 @@ namespace Arena.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Assists")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Augment1Id")
                         .HasColumnType("integer");
 
@@ -89,21 +89,9 @@ namespace Arena.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("DamageDealt")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DamageTaken")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Deaths")
-                        .HasColumnType("integer");
-
                     b.Property<string>("GameName")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Healing")
-                        .HasColumnType("integer");
 
                     b.Property<int>("Item0Id")
                         .HasColumnType("integer");
@@ -123,9 +111,6 @@ namespace Arena.Api.Migrations
                     b.Property<int>("Item5Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Kills")
-                        .HasColumnType("integer");
-
                     b.Property<int>("MatchId")
                         .HasColumnType("integer");
 
@@ -138,9 +123,6 @@ namespace Arena.Api.Migrations
                     b.Property<string>("Puuid")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Shielding")
-                        .HasColumnType("integer");
 
                     b.Property<string>("TagLine")
                         .IsRequired()
