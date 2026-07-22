@@ -245,7 +245,8 @@ public class StatsService
                     AveragePlacement = stats.AveragePlacement
                 };
             })
-            .OrderByDescending(i => i.Games)
+            .Where(x => x.Games >= 5)
+            .OrderBy(x => x.AveragePlacement)
             .ToList();
 
     }
@@ -281,7 +282,8 @@ public class StatsService
                     AveragePlacement = stats.AveragePlacement
                 };
             })
-            .OrderByDescending(a => a.Games)
+            .Where(x => x.Games >= 5)
+            .OrderBy(x => x.AveragePlacement)
             .ToList();
     }
 

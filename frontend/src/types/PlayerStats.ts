@@ -46,6 +46,30 @@ export interface PerformanceStats {
     averageShielding: number;
 }
 
+export interface ItemStats {
+    itemId: number;
+    itemName: string;
+
+    games: number;
+    wins: number;
+    winRate: number;
+    successfulPlacements: number;
+    successfulPlacementRate: number;
+    averagePlacement: number;
+}
+
+export interface AugmentStats {
+    augmentId: number;
+    augmentName: string;
+
+    games: number;
+    wins: number;
+    winRate: number;
+    successfulPlacements: number;
+    successfulPlacementRate: number;
+    averagePlacement: number;
+}
+
 export interface PlayerStats
 {
     gameName: string;
@@ -73,5 +97,9 @@ export interface PlayerStats
     teamChampionStats: TeamChampionStats[];
 
     championStats: ChampionStats[];
+
+    itemStats: ItemStats[];
+
+    augmentStats: AugmentStats[];
     
 }

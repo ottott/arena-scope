@@ -32,11 +32,11 @@
 
             <v-divider v-if="stats" class="my-8" />
 
-            <v-text-field v-if="stats" label="Filter dataset by champion, item or augment..." prepend-inner-icon="mdi-magnify"
-                variant="outlined" clearable />
+            <v-text-field v-if="stats" label="Filter dataset by champion, item or augment..."
+                prepend-inner-icon="mdi-magnify" variant="outlined" clearable />
 
 
-            
+
             <v-row v-if="stats" class="mt-6">
 
                 <v-col cols="12" sm="6" md="3">
@@ -78,19 +78,21 @@
             <v-window v-if="stats" v-model="currentTab" class="mt-6">
 
                 <v-window-item value="overall">
-                    <OverallTab :placement-distribution="stats!.placementDistribution" 
-                    :performance-stats="stats!.performanceStats"
-                    :duo-stats="stats!.duoStats" 
-                    :team-champion-stats= "stats!.teamChampionStats"
-                    :champion-stats="stats!.championStats"/>
+                    <OverallTab :placement-distribution="stats!.placementDistribution"
+                        :performance-stats="stats!.performanceStats" :duo-stats="stats!.duoStats"
+                        :team-champion-stats="stats!.teamChampionStats" :champion-stats="stats!.championStats" />
                 </v-window-item>
 
                 <v-window-item value="items">
-                    <p>Item table goes here.</p>
+
+                    <ItemsTab :item-stats="stats!.itemStats" />
+
                 </v-window-item>
 
                 <v-window-item value="augments">
-                    <p>Augment table goes here.</p>
+                    
+                    <AugmentsTab :augment-stats="stats!.augmentStats"/>
+
                 </v-window-item>
 
                 <v-window-item value="matches">
@@ -109,6 +111,8 @@
 import { ref } from "vue";
 import StatCard from "../components/StatCard.vue";
 import OverallTab from "../components/OverallTab.vue";
+import ItemsTab from "../components/ItemsTab.vue";
+import AugmentsTab from "../components/AugmentsTab.vue";
 import { getPlayerStats, syncPlayer } from "../api/arenaApi";
 import type { PlayerStats } from "../types/PlayerStats";
 
