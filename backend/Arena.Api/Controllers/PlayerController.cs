@@ -9,13 +9,16 @@ public class PlayerController : ControllerBase
 {
     private readonly IPlayerService _playerService;
     private readonly IMatchService _matchService;
+    private readonly IMatchHistoryService _matchHistoryService;
 
     public PlayerController(
         IPlayerService playerService,
-        IMatchService matchService)
+        IMatchService matchService,
+        IMatchHistoryService matchHistoryService)
     {
         _playerService = playerService;
         _matchService = matchService;
+        _matchHistoryService = matchHistoryService;
     }
     [HttpGet]
     public async Task<IActionResult> GetPlayer(
@@ -76,6 +79,31 @@ public class PlayerController : ControllerBase
                 tagLine);
 
             return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
+    }
+
+    [HttpGet("match-history")]
+    public async Task<IActionResult> GetMatchHistory(
+    [FromQuery] string gameName,
+    [FromQuery] string tagLine)
+    {
+        try
+        {
+            var player = await _playerService.GetPlayerAsync(
+                gameName,
+                tagLine);
+
+            var history = await _matchHistoryService.GetMatchHistoryAsync(
+                player.Puuid);
+
+            return Ok(history);
         }
         catch (Exception ex)
         {

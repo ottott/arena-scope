@@ -90,13 +90,15 @@
                 </v-window-item>
 
                 <v-window-item value="augments">
-                    
-                    <AugmentsTab :augment-stats="stats!.augmentStats"/>
+
+                    <AugmentsTab :augment-stats="stats!.augmentStats" />
 
                 </v-window-item>
 
                 <v-window-item value="matches">
-                    <p>Matches table goes here.</p>
+
+                    <MatchHistoryTab :match-history="matchHistory" />
+
                 </v-window-item>
 
             </v-window>
@@ -108,20 +110,42 @@
 
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import StatCard from "../components/StatCard.vue";
 import OverallTab from "../components/OverallTab.vue";
 import ItemsTab from "../components/ItemsTab.vue";
 import AugmentsTab from "../components/AugmentsTab.vue";
-import { getPlayerStats, syncPlayer } from "../api/arenaApi";
+import MatchHistoryTab from "../components/MatchHistoryTab.vue";
+import { getPlayerStats, syncPlayer, getMatchHistory } from "../api/arenaApi";
 import type { PlayerStats } from "../types/PlayerStats";
+import type { MatchHistory } from "../types/MatchHistory";
 
 
 const gameName = ref(localStorage.getItem("gameName") ?? "");
 const tagLine = ref(localStorage.getItem("tagLine") ?? "");
 const stats = ref<PlayerStats | null>(null);
+const matchHistory = ref<MatchHistory[]>([]);
 
 const currentTab = ref("overall");
+
+const loadedMatchHistory = ref(false);
+
+watch(currentTab, async (tab) => {
+
+    if (tab !== "matches")
+        return;
+
+    if (loadedMatchHistory.value)
+        return;
+
+    matchHistory.value = await getMatchHistory(
+        gameName.value,
+        tagLine.value
+    );
+
+    loadedMatchHistory.value = true;
+
+});
 
 const loading = ref(false);
 

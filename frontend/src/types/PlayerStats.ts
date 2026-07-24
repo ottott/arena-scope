@@ -101,5 +101,6 @@ export interface PlayerStats
     itemStats: ItemStats[];
 
     augmentStats: AugmentStats[];
+
     
 }

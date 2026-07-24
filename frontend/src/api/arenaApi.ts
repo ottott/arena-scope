@@ -38,3 +38,19 @@ export async function syncPlayer(
         }
     );
 }
+
+export async function getMatchHistory(
+    gameName: string,
+    tagLine: string
+) {
+    const response = await arenaApi.get(
+        "/player/match-history",
+        {
+            params: {
+                gameName,
+                tagLine
+            }
+        });
+
+    return response.data;
+}

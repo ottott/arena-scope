@@ -27,6 +27,7 @@ builder.Services.AddDbContext<ArenaDbContext>(options =>
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<StatsService>();
+builder.Services.AddScoped<IMatchHistoryService, MatchHistoryService>();
 builder.Services.AddSingleton<ItemLookupService>();
 builder.Services.AddSingleton<AugmentLookupService>();
 builder.Services.AddHttpClient();
