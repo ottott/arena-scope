@@ -76,7 +76,8 @@ public class PlayerController : ControllerBase
         {
             var stats = await _playerService.GetPlayerStatsAsync(
                 gameName,
-                tagLine);
+                tagLine,
+                new Models.StatsFilter());
 
             return Ok(stats);
         }

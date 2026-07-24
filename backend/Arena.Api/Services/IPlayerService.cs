@@ -9,5 +9,6 @@ public interface IPlayerService
 
     Task<PlayerStatsDto> GetPlayerStatsAsync(
         string gameName,
-        string tagLine);
+        string tagLine,
+        StatsFilter? filter = null);
 }

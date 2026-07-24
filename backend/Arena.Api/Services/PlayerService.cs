@@ -32,6 +32,7 @@ public class PlayerService : IPlayerService
     var player = await _context.Players
         .FirstOrDefaultAsync(p => p.Puuid == account.Puuid);
 
+
     if (player == null)
     {
         player = new Player
@@ -54,25 +55,27 @@ public class PlayerService : IPlayerService
     return player;
     }
 
-    public async Task<PlayerStatsDto> GetPlayerStatsAsync(string gameName, string tagLine)
+    public async Task<PlayerStatsDto> GetPlayerStatsAsync(string gameName, string tagLine, StatsFilter? filter = null)
     {
         var player = await GetPlayerAsync(gameName, tagLine);
+        
+        filter ??= new StatsFilter();
                
-        var overallStats = await _statsService.GetOverallStatsAsync(player.Puuid);
+        var overallStats = await _statsService.GetOverallStatsAsync(player.Puuid, filter);
         
-        var championStats = await _statsService.GetChampionStatsAsync(player.Puuid);
+        var championStats = await _statsService.GetChampionStatsAsync(player.Puuid, filter);
         
-        var duoStats = await _statsService.GetDuoStatsAsync(player.Puuid);
+        var duoStats = await _statsService.GetDuoStatsAsync(player.Puuid, filter);
 
-        var itemStats = await _statsService.GetItemStatsAsync(player.Puuid);
+        var itemStats = await _statsService.GetItemStatsAsync(player.Puuid, filter);
 
-        var augmentStats = await _statsService.GetAugmentStatsAsync(player.Puuid);
+        var augmentStats = await _statsService.GetAugmentStatsAsync(player.Puuid, filter);
 
-        var placementDistribution = await _statsService.GetPlacementDistributionAsync(player.Puuid);
+        var placementDistribution = await _statsService.GetPlacementDistributionAsync(player.Puuid, filter);
 
-        var performanceStats = await _statsService.GetPerformanceStatsAsync(player.Puuid);
+        var performanceStats = await _statsService.GetPerformanceStatsAsync(player.Puuid, filter);
 
-        var teamChampionStats = await _statsService.GetTeamChampionStatsAsync(player.Puuid);
+        var teamChampionStats = await _statsService.GetTeamChampionStatsAsync(player.Puuid, filter);
 
 
 

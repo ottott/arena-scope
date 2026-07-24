@@ -11,17 +11,20 @@ public class StatsService
     private readonly IConfiguration _configuration;
     private readonly ItemLookupService _itemLookup;
     private readonly AugmentLookupService _augmentLookup;
+    private readonly ParticipantFilterService _participantFilter;
 
     public StatsService(
         ArenaDbContext context,
         IConfiguration configuration,
         ItemLookupService itemLookup,
-        AugmentLookupService augmentLookup)
+        AugmentLookupService augmentLookup,
+        ParticipantFilterService participantFilter)
     {
         _context = context;
         _configuration = configuration;
         _itemLookup = itemLookup;
         _augmentLookup = augmentLookup;
+        _participantFilter = participantFilter;
     }
 
     private record ItemParticipant(
@@ -82,10 +85,14 @@ public class StatsService
         }
     }
 
-    private IQueryable<Participant> GetPlayerParticipants(string puuid)
+    private IQueryable<Participant> GetPlayerParticipants(
+        string puuid,
+        StatsFilter filter)
     {
-        return _context.Participants
+        var query = _context.Participants
             .Where(p => p.Puuid == puuid);
+
+        return _participantFilter.ApplyFilter(query, filter);
     }
 
     private EntityStatsDto BuildEntityStats(
@@ -117,22 +124,22 @@ public class StatsService
         };
     }
 
-    public async Task<EntityStatsDto> GetOverallStatsAsync(string puuid)
+    public async Task<EntityStatsDto> GetOverallStatsAsync(string puuid, StatsFilter filter)
     {
         var successfulPlacement =
             _configuration.GetValue<int>("Arena:SuccessfulPlacement");
 
-        var participants = await GetPlayerParticipants(puuid).ToListAsync();
+        var participants = await GetPlayerParticipants(puuid, filter).ToListAsync();
 
         return BuildEntityStats(participants, successfulPlacement);
     }
 
-    public async Task<List<ChampionStatsDto>> GetChampionStatsAsync(string puuid)
+    public async Task<List<ChampionStatsDto>> GetChampionStatsAsync(string puuid, StatsFilter filter)
     {
         var successfulPlacement =
             _configuration.GetValue<int>("Arena:SuccessfulPlacement");
 
-        var groups = await GetPlayerParticipants(puuid)
+        var groups = await GetPlayerParticipants(puuid, filter)
             .GroupBy(p => p.ChampionName)
             .ToListAsync();
 
@@ -159,68 +166,59 @@ public class StatsService
             .ToList();
     }
 
-    public async Task<List<DuoStatsDto>> GetDuoStatsAsync(string puuid)
+    public async Task<List<DuoStatsDto>> GetDuoStatsAsync(
+        string puuid,
+        StatsFilter filter)
     {
+        var meQuery = GetPlayerParticipants(puuid, filter);
 
-        var successfulPlacement =
-                _configuration.GetValue<int>("Arena:SuccessfulPlacement");
-
-        var groups = await (
-            from me in _context.Participants
+        var stats = await (
+            from me in meQuery
 
             join teammate in _context.Participants
-                on new
-                {
-                    me.MatchId,
-                    me.PlayerSubteamId
-                }
-                equals new
-                {
-                    teammate.MatchId,
-                    teammate.PlayerSubteamId
-                }
+                on new { me.MatchId, me.PlayerSubteamId }
+                equals new { teammate.MatchId, teammate.PlayerSubteamId }
 
-            where me.Puuid == puuid
-                && teammate.Puuid != puuid
+            where teammate.Puuid != puuid
 
             group me by new
             {
-                teammate.Puuid,
                 teammate.GameName,
                 teammate.TagLine
-            })
-            .ToListAsync();
+            }
+            into g
 
-        return groups
-            .Select(g =>
+            select new DuoStatsDto
             {
-                var stats = BuildEntityStats(g, successfulPlacement);
-
-                return new DuoStatsDto
-                {
-                    GameName = g.Key.GameName,
-                    TagLine = g.Key.TagLine,
-
-                    Games = stats.Games,
-                    Wins = stats.Wins,
-                    WinRate = stats.WinRate,
-                    SuccessfulPlacements = stats.SuccessfulPlacements,
-                    SuccessfulPlacementRate = stats.SuccessfulPlacementRate,
-                    AveragePlacement = stats.AveragePlacement
-                };
+                GameName = g.Key.GameName,
+                TagLine = g.Key.TagLine,
+                Games = g.Count(),
+                Wins = g.Count(x => x.Placement == 1),
+                SuccessfulPlacements = g.Count(x => x.Placement <= 4),
+                AveragePlacement = g.Average(x => x.Placement)
             })
             .Where(x => x.Games >= 5)
+            .ToListAsync();
+
+        foreach (var stat in stats)
+        {
+            stat.WinRate = stat.Wins * 100.0 / stat.Games;
+            stat.SuccessfulPlacementRate =
+                stat.SuccessfulPlacements * 100.0 / stat.Games;
+        }
+
+        return stats
             .OrderBy(x => x.AveragePlacement)
             .ToList();
     }
 
-    public async Task<List<ItemStatsDto>> GetItemStatsAsync(string puuid)
+    public async Task<List<ItemStatsDto>> GetItemStatsAsync(string puuid, StatsFilter filter)
     {
         var successfulPlacement =
             _configuration.GetValue<int>("Arena:SuccessfulPlacement");
 
         var participants =
-            await GetPlayerParticipants(puuid).ToListAsync();
+            await GetPlayerParticipants(puuid, filter).ToListAsync();
 
         var groups = FlattenItems(participants)
             .GroupBy(x => x.ItemId);
@@ -251,13 +249,13 @@ public class StatsService
 
     }
 
-    public async Task<List<AugmentStatsDto>> GetAugmentStatsAsync(string puuid)
+    public async Task<List<AugmentStatsDto>> GetAugmentStatsAsync(string puuid, StatsFilter filter)
     {
         var successfulPlacement =
             _configuration.GetValue<int>("Arena:SuccessfulPlacement");
 
         var participants =
-            await GetPlayerParticipants(puuid).ToListAsync();
+            await GetPlayerParticipants(puuid, filter).ToListAsync();
 
         var groups = FlattenAugments(participants)
             .GroupBy(x => x.AugmentId);
@@ -287,9 +285,9 @@ public class StatsService
             .ToList();
     }
 
-    public async Task<List<PlacementDistributionDto>> GetPlacementDistributionAsync(string puuid)
+    public async Task<List<PlacementDistributionDto>> GetPlacementDistributionAsync(string puuid, StatsFilter filter)
     {
-        return await GetPlayerParticipants(puuid)
+        return await GetPlayerParticipants(puuid, filter)
             .GroupBy(p => p.Placement)
             .Select(g => new PlacementDistributionDto
             {
@@ -301,11 +299,9 @@ public class StatsService
     }
 
 
-    public async Task<PerformanceStatsDto> GetPerformanceStatsAsync(string puuid)
+    public async Task<PerformanceStatsDto> GetPerformanceStatsAsync(string puuid, StatsFilter filter)
     {
-        var participants = await _context.Participants
-            .Where(p => p.Puuid == puuid)
-            .ToListAsync();
+        var participants = await GetPlayerParticipants(puuid, filter).ToListAsync();
 
         if (participants.Count == 0)
         {
@@ -336,15 +332,12 @@ public class StatsService
         };
     }
 
-    public async Task<List<TeamChampionStatsDto>> GetTeamChampionStatsAsync(string puuid)
+    public async Task<List<TeamChampionStatsDto>> GetTeamChampionStatsAsync(string puuid, StatsFilter filter)
     {
         var successfulPlacement =
             _configuration.GetValue<int>("Arena:SuccessfulPlacement");
 
-        var stats = await _context.Participants
-
-            // Find YOUR participant rows
-            .Where(p => p.Puuid == puuid)
+        var stats = await GetPlayerParticipants(puuid, filter)
 
             // For each of your games...
             .SelectMany(player =>
