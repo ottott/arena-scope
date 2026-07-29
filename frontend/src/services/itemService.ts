@@ -13,19 +13,10 @@ export async function getItems(): Promise<Item[]> {
 
 
     const response = await fetch(
-        "https://ddragon.leagueoflegends.com/cdn/15.15.1/data/en_US/item.json"
+        "http://localhost:5271/api/metadata/items"
     );
 
-    const json = await response.json();
-
-
-    itemsCache = Object.entries(json.data)
-        .map(([id, item]: [string, any]) => ({
-            id: Number(id),
-            name: item.name
-        }))
-        .filter(item => item.name.length > 0)
-        .sort((a, b) => a.name.localeCompare(b.name));
+    itemsCache = await response.json() as Item[];
 
 
     return itemsCache;

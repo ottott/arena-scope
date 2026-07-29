@@ -31,6 +31,7 @@ builder.Services.AddScoped<IMatchHistoryService, MatchHistoryService>();
 builder.Services.AddScoped<ParticipantFilterService>();
 builder.Services.AddSingleton<ItemLookupService>();
 builder.Services.AddSingleton<AugmentLookupService>();
+builder.Services.AddScoped<ArenaItemService>();
 builder.Services.AddHttpClient();
 
 builder.Services.AddHttpClient<RiotApiClient>();
