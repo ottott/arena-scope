@@ -5,6 +5,8 @@ obj/
 # User secrets (kept outside the project anyway)
 secrets.json
 
+.env
+
 # Visual Studio
 .vs/
 *.user

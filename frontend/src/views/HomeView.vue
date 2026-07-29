@@ -32,9 +32,9 @@
 
             <v-divider v-if="stats" class="my-8" />
 
-            <v-text-field v-if="stats" label="Filter dataset by champion, item or augment..."
-                prepend-inner-icon="mdi-magnify" variant="outlined" clearable />
-
+            <v-autocomplete v-model="selectedFilters" :items="filterOptions" item-title="name" return-object multiple
+                chips closable-chips label="Filter dataset by champion, item or augment..."
+                @update:model-value="updateFilters" />
 
 
             <v-row v-if="stats" class="mt-6">
@@ -110,40 +110,133 @@
 
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import StatCard from "../components/StatCard.vue";
 import OverallTab from "../components/OverallTab.vue";
 import ItemsTab from "../components/ItemsTab.vue";
 import AugmentsTab from "../components/AugmentsTab.vue";
 import MatchHistoryTab from "../components/MatchHistoryTab.vue";
+import { getChampions } from "../services/championService";
+import { getItems } from "../services/itemService";
+import { getAugments } from "../services/augmentService";
 import { getPlayerStats, syncPlayer, getMatchHistory } from "../api/arenaApi";
 import type { PlayerStats } from "../types/PlayerStats";
 import type { MatchHistory } from "../types/MatchHistory";
+import type { StatsFilter } from "../types/StatsFilter";
+import type { FilterOption } from "../types/FilterOption";
 
 
 const gameName = ref(localStorage.getItem("gameName") ?? "");
 const tagLine = ref(localStorage.getItem("tagLine") ?? "");
+
+const filter = ref<StatsFilter>({});
+
+const filterOptions = ref<FilterOption[]>([]);
+
+const selectedFilters = ref<FilterOption[]>([]);
+
+onMounted(async () => {
+
+    const champions = await getChampions();
+    const items = await getItems();
+    const augments = await getAugments();
+
+    filterOptions.value = [
+        ...champions.map<FilterOption>(c => ({
+            type: "champion",
+            id: c.name,
+            name: c.name
+        })),
+
+        ...items.map<FilterOption>(i => ({
+            type: "item",
+            id: i.id,
+            name: i.name
+        })),
+
+        ...augments.map<FilterOption>(a => ({
+            type: "augment",
+            id: a.id,
+            name: a.name
+        }))
+    ];
+
+});
+
+function updateFilters(options: FilterOption[]) {
+
+    filter.value = {};
+
+    const champion = options.find(
+        x => x.type === "champion"
+    );
+
+    if (champion) {
+        filter.value.championName = champion.name;
+    }
+
+
+    const items = options
+        .filter(x => x.type === "item")
+        .map(x => Number(x.id));
+
+
+    if (items.length > 0) {
+        filter.value.itemIds = items;
+    }
+
+
+    const augments = options
+        .filter(x => x.type === "augment")
+        .map(x => Number(x.id));
+
+
+    if (augments.length > 0) {
+        filter.value.augmentIds = augments;
+    }
+
+    console.log("FILTER SENT:", JSON.stringify(filter.value));
+
+    if (stats.value) {
+        refreshData();
+    }
+
+}
+
+async function refreshData() {
+
+    stats.value = await getPlayerStats(
+        gameName.value,
+        tagLine.value,
+        filter.value
+    );
+
+    if (currentTab.value === "matches") {
+
+        matchHistory.value = await getMatchHistory(
+            gameName.value,
+            tagLine.value,
+            filter.value
+        );
+
+    }
+}
+
 const stats = ref<PlayerStats | null>(null);
 const matchHistory = ref<MatchHistory[]>([]);
 
 const currentTab = ref("overall");
-
-const loadedMatchHistory = ref(false);
 
 watch(currentTab, async (tab) => {
 
     if (tab !== "matches")
         return;
 
-    if (loadedMatchHistory.value)
-        return;
-
     matchHistory.value = await getMatchHistory(
         gameName.value,
-        tagLine.value
+        tagLine.value,
+        filter.value
     );
-
-    loadedMatchHistory.value = true;
 
 });
 
@@ -165,7 +258,8 @@ async function analyze() {
 
         stats.value = await getPlayerStats(
             gameName.value,
-            tagLine.value
+            tagLine.value,
+            filter.value
         );
 
     }

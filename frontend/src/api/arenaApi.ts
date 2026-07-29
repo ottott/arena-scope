@@ -1,13 +1,19 @@
 import axios from "axios";
+import qs from "qs";
+
 import type { PlayerStats } from "../types/PlayerStats";
+import type { StatsFilter } from "../types/StatsFilter";
 
 const arenaApi = axios.create({
-    baseURL: "http://localhost:5271/api"
+    baseURL: "http://localhost:5271/api",    
+    paramsSerializer: params =>
+        qs.stringify(params, { arrayFormat: "repeat" })
 });
 
 export async function getPlayerStats(
     gameName: string,
-    tagLine: string
+    tagLine: string,
+    filter: StatsFilter
 ): Promise<PlayerStats> {
 
     const response = await arenaApi.get<PlayerStats>(
@@ -15,7 +21,8 @@ export async function getPlayerStats(
         {
             params: {
                 gameName,
-                tagLine
+                tagLine,
+                ...filter
             }
         });
 
@@ -41,14 +48,16 @@ export async function syncPlayer(
 
 export async function getMatchHistory(
     gameName: string,
-    tagLine: string
+    tagLine: string,
+    filter: StatsFilter
 ) {
     const response = await arenaApi.get(
         "/player/match-history",
         {
             params: {
                 gameName,
-                tagLine
+                tagLine,
+                ...filter
             }
         });
 

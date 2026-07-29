@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Arena.Api.Services;
+using Arena.Api.Models;
 
 namespace Arena.Api.Controllers;
 
@@ -70,14 +71,16 @@ public class PlayerController : ControllerBase
     [HttpGet("stats")]
     public async Task<IActionResult> GetPlayerStats(
         [FromQuery] string gameName,
-        [FromQuery] string tagLine)
+        [FromQuery] string tagLine,
+        [FromQuery] StatsFilter filter)
     {
         try
         {
+            Console.WriteLine(filter.AugmentIds == null);
             var stats = await _playerService.GetPlayerStatsAsync(
                 gameName,
                 tagLine,
-                new Models.StatsFilter());
+                filter);
 
             return Ok(stats);
         }
@@ -93,7 +96,8 @@ public class PlayerController : ControllerBase
     [HttpGet("match-history")]
     public async Task<IActionResult> GetMatchHistory(
     [FromQuery] string gameName,
-    [FromQuery] string tagLine)
+    [FromQuery] string tagLine,
+    [FromQuery] StatsFilter filter)
     {
         try
         {
@@ -102,7 +106,8 @@ public class PlayerController : ControllerBase
                 tagLine);
 
             var history = await _matchHistoryService.GetMatchHistoryAsync(
-                player.Puuid);
+                player.Puuid,
+                filter);
 
             return Ok(history);
         }

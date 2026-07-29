@@ -4,7 +4,7 @@ public class StatsFilter
 {
     public string? ChampionName { get; set; }
 
-    public int? ItemId { get; set; }
+    public int[]? ItemIds { get; set; }
 
-    public int? AugmentId { get; set; }
+    public int[]? AugmentIds { get; set; }
 }

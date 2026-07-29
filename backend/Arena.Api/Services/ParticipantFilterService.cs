@@ -8,33 +8,45 @@ public class ParticipantFilterService
         IQueryable<Participant> query,
         StatsFilter filter)
     {
-        if (!string.IsNullOrWhiteSpace(filter.ChampionName))
+        if (filter.ChampionName != null &&
+            filter.ChampionName.Length > 0)
         {
             query = query.Where(p =>
-                p.ChampionName == filter.ChampionName);
+                filter.ChampionName.Contains(p.ChampionName));
         }
 
-        if (filter.ItemId.HasValue)
+
+        if (filter.ItemIds != null &&
+            filter.ItemIds.Length > 0)
         {
-            query = query.Where(p =>
-                p.Item0Id == filter.ItemId ||
-                p.Item1Id == filter.ItemId ||
-                p.Item2Id == filter.ItemId ||
-                p.Item3Id == filter.ItemId ||
-                p.Item4Id == filter.ItemId ||
-                p.Item5Id == filter.ItemId);
+            foreach (var itemId in filter.ItemIds)
+            {
+                query = query.Where(p =>
+                    p.Item0Id == itemId ||
+                    p.Item1Id == itemId ||
+                    p.Item2Id == itemId ||
+                    p.Item3Id == itemId ||
+                    p.Item4Id == itemId ||
+                    p.Item5Id == itemId);
+            }
         }
 
-        if (filter.AugmentId.HasValue)
+
+        if (filter.AugmentIds != null &&
+            filter.AugmentIds.Length > 0)
         {
-            query = query.Where(p =>
-                p.Augment1Id == filter.AugmentId ||
-                p.Augment2Id == filter.AugmentId ||
-                p.Augment3Id == filter.AugmentId ||
-                p.Augment4Id == filter.AugmentId ||
-                p.Augment5Id == filter.AugmentId ||
-                p.Augment6Id == filter.AugmentId);
+            foreach (var augmentId in filter.AugmentIds)
+            {
+                query = query.Where(p =>
+                    p.Augment1Id == augmentId ||
+                    p.Augment2Id == augmentId ||
+                    p.Augment3Id == augmentId ||
+                    p.Augment4Id == augmentId ||
+                    p.Augment5Id == augmentId ||
+                    p.Augment6Id == augmentId);
+            }
         }
+
 
         return query;
     }
