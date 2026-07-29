@@ -1,6 +1,7 @@
 export interface Augment {
     id: number;
     name: string;
+    icon: string;
 }
 
 
@@ -19,12 +20,16 @@ export async function getAugments(): Promise<Augment[]> {
 
 
     const json = await response.json();
+
+    console.log(json.augments[0]);
+
     
 
     const augments: Augment[] = json.augments
         .map((augment: any) => ({
             id: augment.id,
-            name: augment.name
+            name: augment.name,
+            icon: `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/${augment.iconSmall}`
         }))
         .sort((a: Augment, b: Augment) =>
             a.name.localeCompare(b.name)

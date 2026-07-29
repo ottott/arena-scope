@@ -34,7 +34,31 @@
 
             <v-autocomplete v-model="selectedFilters" :items="filterOptions" item-title="name" return-object multiple
                 chips closable-chips label="Filter dataset by champion, item or augment..."
-                @update:model-value="updateFilters" />
+                @update:model-value="updateFilters">
+                <!-- Dropdown items -->
+                <template #item="{ props, item }">
+                    <v-list-item v-bind="props">
+                        <template #prepend>
+                            <v-avatar size="28">
+                                <v-img v-if="item.icon" :src="item.icon" :alt="item.name" cover />
+                            </v-avatar>
+                        </template>
+                    </v-list-item>
+                </template>
+
+                <!-- Selected chips -->
+                <template #chip="{ props, item }">
+                    <v-chip v-bind="props">
+                        <template #prepend>
+                            <v-avatar size="18">
+                                <v-img v-if="item.icon" :src="item.icon" :alt="item.name" cover />
+                            </v-avatar>
+                        </template>
+
+                        {{ item.name }}
+                    </v-chip>
+                </template>
+            </v-autocomplete>
 
 
             <v-row v-if="stats" class="mt-6">
@@ -145,19 +169,22 @@ onMounted(async () => {
         ...champions.map<FilterOption>(c => ({
             type: "champion",
             id: c.name,
-            name: c.name
+            name: c.name,
+            icon: c.icon
         })),
 
         ...items.map<FilterOption>(i => ({
             type: "item",
             id: i.id,
-            name: i.name
+            name: i.name,
+            icon: i.icon
         })),
 
         ...augments.map<FilterOption>(a => ({
             type: "augment",
             id: a.id,
-            name: a.name
+            name: a.name,
+            icon: a.icon
         }))
     ];
 

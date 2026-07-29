@@ -1,6 +1,7 @@
 export interface Champion {
     id: string;
     name: string;
+    icon: string;
 }
 
 let championsCache: Champion[] | null = null;
@@ -19,7 +20,8 @@ export async function getChampions(): Promise<Champion[]> {
     championsCache = Object.values(json.data)
         .map((c: any) => ({
             id: c.id,
-            name: c.name
+            name: c.name,
+            icon: `https://ddragon.leagueoflegends.com/cdn/16.15.1/img/champion/${c.id}.png`
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
 
