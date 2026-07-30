@@ -4,54 +4,6 @@ Arena Scope is a web application for analyzing **League of Legends Arena** match
 
 The goal of the project is to provide meaningful Arena-specific insights that are not available in the official League client.
 
-## Features
-
-### Player Analysis
-
-* Analyze any Riot ID (`GameName#TagLine`)
-* Automatically synchronize Arena match history
-* Season-aware syncing to avoid unnecessary API requests
-* Incremental updates after the initial import
-
-### Overall Statistics
-
-* Games played
-* Win rate
-* Top 3 rate
-* Average placement
-* Placement distribution chart
-* Combat performance (KDA)
-* Damage, healing and shielding averages
-* Best teammates
-* Best team champions
-* Champion performance table
-
-### Item Analytics
-
-* Performance statistics for every item used
-* Games played
-* Average placement
-* Top 3 rate
-* Win rate
-* Sortable table
-
-### Augment Analytics
-
-* Performance statistics for every augment
-* Games played
-* Average placement
-* Top 3 rate
-* Win rate
-* Sortable table
-
-### Planned Features
-
-* Match history page with detailed match breakdown
-* Champion and item icons
-* Advanced filtering engine
-* Match detail view
-* Additional Arena-specific analytics
-
 ---
 
 ## Tech Stack
@@ -68,19 +20,6 @@ The goal of the project is to provide meaningful Arena-specific insights that ar
 * Vue 3
 * TypeScript
 * Vuetify
-* Axios
-* Chart.js
-
----
-
-## Architecture
-
-The application consists of two main parts:
-
-* **Backend** – Handles Riot API communication, match synchronization, data processing, and exposes a REST API.
-* **Frontend** – Displays interactive statistics and analytics through a modern Vue interface.
-
-During synchronization, matches are downloaded once and stored locally, allowing statistics to be generated quickly without repeatedly querying Riot's API.
 
 ---
 
@@ -89,24 +28,39 @@ During synchronization, matches are downloaded once and stored locally, allowing
 *(Coming soon)*
 
 ---
+## Prerequisites
 
-## Running Locally
+- .NET SDK
+- Node.js
+- Docker Desktop
 
-### Backend
+## Configuration
+
+The Riot Games API key is stored using ASP.NET Core User Secrets.
 
 ```bash
-cd backend
-dotnet restore
-dotnet ef database update
+cd Arena.Api
+dotnet user-secrets init
+dotnet user-secrets set "Riot:ApiKey" "YOUR_API_KEY"
+```
+
+## Start PostgreSQL
+
+```bash
+docker compose up -d
+```
+
+## Run the backend
+
+```bash
+cd Arena.Api
 dotnet run
 ```
 
-### Frontend
+## Run the frontend
 
 ```bash
-cd frontend
+cd arena-frontend
 npm install
 npm run dev
 ```
-
-The frontend expects the backend API to be running locally.
