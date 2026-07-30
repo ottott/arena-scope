@@ -24,8 +24,12 @@ The goal of the project is to provide meaningful Arena-specific insights that ar
 ---
 
 ## Screenshots
+<img width="869" height="922" alt="Screenshot 2026-07-30 124643" src="https://github.com/user-attachments/assets/c407bd07-83e0-4183-8fed-30378a514424" />
 
-*(Coming soon)*
+<img width="871" height="845" alt="Screenshot 2026-07-30 125255" src="https://github.com/user-attachments/assets/926c1426-855e-48b0-8da3-dbf272ea8962" />
+
+<img width="866" height="900" alt="Screenshot 2026-07-30 125701" src="https://github.com/user-attachments/assets/5ae4514d-7630-4480-9f76-b887dc0635e4" />
+
 
 ---
 ## Prerequisites
