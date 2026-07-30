@@ -53,6 +53,7 @@ docker compose up -d
 ## Run the backend
 
 ```bash
+cd backend
 cd Arena.Api
 dotnet run
 ```
@@ -60,7 +61,7 @@ dotnet run
 ## Run the frontend
 
 ```bash
-cd arena-frontend
+cd frontend
 npm install
 npm run dev
 ```
