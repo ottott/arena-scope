@@ -43,6 +43,7 @@ The goal of the project is to provide meaningful Arena-specific insights that ar
 The Riot Games API key is stored using ASP.NET Core User Secrets.
 
 ```bash
+cd backend
 cd Arena.Api
 dotnet user-secrets init
 dotnet user-secrets set "Riot:ApiKey" "YOUR_API_KEY"
