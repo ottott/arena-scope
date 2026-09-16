@@ -4,8 +4,8 @@ import qs from "qs";
 import type { PlayerStats } from "../types/PlayerStats";
 import type { StatsFilter } from "../types/StatsFilter";
 
-const arenaApi = axios.create({
-    baseURL: "http://localhost:5271/api",    
+export const arenaApi = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
     paramsSerializer: params =>
         qs.stringify(params, { arrayFormat: "repeat" })
 });

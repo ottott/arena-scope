@@ -1,3 +1,5 @@
+import { arenaApi } from "../api/arenaApi";
+
 export interface Item {
     id: number;
     name: string;
@@ -10,11 +12,8 @@ export async function getItems(): Promise<Item[]> {
     if (itemsCache)
         return itemsCache;
 
-    const response = await fetch(
-        "http://localhost:5271/api/metadata/items"
-    );
-
-    const items = await response.json() as Omit<Item, "icon">[];
+    const response = await arenaApi.get<Omit<Item, "icon">[]>("/metadata/items");
+    const items = response.data;
 
     itemsCache = items
         .map(item => ({
