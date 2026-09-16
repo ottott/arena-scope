@@ -21,10 +21,6 @@ export async function getAugments(): Promise<Augment[]> {
 
     const json = await response.json();
 
-    console.log(json.augments[0]);
-
-    
-
     const augments: Augment[] = json.augments
         .map((augment: any) => ({
             id: augment.id,

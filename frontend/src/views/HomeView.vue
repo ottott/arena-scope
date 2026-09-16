@@ -30,6 +30,10 @@
             </v-row>
 
 
+            <v-alert v-if="analysisError" type="error" variant="tonal" class="mt-4" role="alert">
+                {{ analysisError }}
+            </v-alert>
+
             <v-divider v-if="stats" class="my-8" />
 
             <v-autocomplete v-model="selectedFilters" :items="filterOptions" item-title="name" return-object multiple
@@ -222,8 +226,6 @@ function updateFilters(options: FilterOption[]) {
         filter.value.augmentIds = augments;
     }
 
-    console.log("FILTER SENT:", JSON.stringify(filter.value));
-
     if (stats.value) {
         refreshData();
     }
@@ -268,10 +270,14 @@ watch(currentTab, async (tab) => {
 });
 
 const loading = ref(false);
+const analysisError = ref("");
 
 async function analyze() {
 
+    analysisError.value = "";
     loading.value = true;
+    stats.value = null;
+    matchHistory.value = [];
 
     localStorage.setItem("gameName", gameName.value);
     localStorage.setItem("tagLine", tagLine.value);
@@ -290,9 +296,9 @@ async function analyze() {
         );
 
     }
-    catch (error) {
+    catch {
 
-        console.error(error);
+        analysisError.value = "Unable to analyze this player. Check the Riot ID and tag, make sure the backend is running with a valid Riot API key, and try again.";
 
     }
     finally {

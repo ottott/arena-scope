@@ -76,7 +76,6 @@ public class PlayerController : ControllerBase
     {
         try
         {
-            Console.WriteLine(filter.AugmentIds == null);
             var stats = await _playerService.GetPlayerStatsAsync(
                 gameName,
                 tagLine,
